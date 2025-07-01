@@ -7,13 +7,14 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from '@expo/vector-icons';
 
 import Dashboard from "./src/screens/Dashboard";
-import NewOrder  from "./src/screens/NewOrder";
-import Received  from "./src/screens/ReceivedScreen";
-import Ready     from "./src/screens/ReadyScreen";
-import Settings  from "./src/screens/SettingsScreen";
+import NewOrder from "./src/screens/NewOrder";
+import Received from "./src/screens/ReceivedScreen";
+import Ready from "./src/screens/ReadyScreen";
+import Settings from "./src/screens/SettingsScreen";
 import { PaperProvider } from "react-native-paper";
-import NewOrder1 from "./src/screens/NewOrder";
 import Revenue from "./src/screens/Revenue";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import CustomerInput from "./src/screens/CustomerInput";
 
 // Tuỳ biến theme nếu cần
 const theme = extendTheme({
@@ -35,8 +36,37 @@ export type RootTabParamList = {
   Revenue: undefined;
 };
 
-const Tab = createBottomTabNavigator<RootTabParamList>();
+export type NewOrderStackParamList = {
+  NewOrder?: any;
+  CustomerInput?: any;
+  Received?: undefined;
+}
 
+const Tab = createBottomTabNavigator<RootTabParamList>();
+const NewOrderStack = createNativeStackNavigator<NewOrderStackParamList>();
+function NewOrderStackNavigator() {
+  return (
+    <NewOrderStack.Navigator>
+      <NewOrderStack.Screen 
+        name="NewOrder" 
+        component={NewOrder}
+        options={{ headerShown: false }} // Ẩn header của NewOrder
+      />
+      <NewOrderStack.Screen 
+        name="CustomerInput" 
+        component={CustomerInput}
+        options={{ title: "Nhập thông tin khách hàng" }}
+
+      />
+      <NewOrderStack.Screen 
+        name="Received" 
+        component={Received}
+        options={{ headerShown: false }} 
+      />
+
+    </NewOrderStack.Navigator>
+  );
+}
 export default function App() {
   return (
     <PaperProvider>
@@ -67,7 +97,7 @@ export default function App() {
                     iconName = 'settings';
                     break;
                   case 'Revenue':
-                  iconName = 'cash';
+                    iconName = 'cash';
                   default:
                     iconName = 'ellipse';
                 }
@@ -84,7 +114,7 @@ export default function App() {
             />
             <Tab.Screen
               name="NewOrder"
-              component={NewOrder1}
+              component={NewOrderStackNavigator}
               options={{ title: "Tạo đơn mới" }}
             />
             <Tab.Screen

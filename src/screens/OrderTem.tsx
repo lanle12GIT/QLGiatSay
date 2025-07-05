@@ -310,9 +310,10 @@ export default function OrderTem({ route }: Props) {
       
       await Print.printAsync({
         html,
-        width: 226, // 58mm converted to points (58mm * 3.779527559 ≈ 219pt)
-        height: 800, // Auto height
+        width: 226,
+        height: 800,
         orientation: Print.Orientation.portrait,
+        useMarkupFormatter: true,
       });
     } catch (error) {
       console.error('Thermal print error:', error);
@@ -326,9 +327,10 @@ export default function OrderTem({ route }: Props) {
       
       await Print.printAsync({
         html,
-        width: 302, // 80mm converted to points (80mm * 3.779527559 ≈ 302pt)
+        width: 302,
         height: 800,
         orientation: Print.Orientation.portrait,
+        useMarkupFormatter: true,
       });
     } catch (error) {
       console.error('Thermal print error:', error);
@@ -344,13 +346,15 @@ export default function OrderTem({ route }: Props) {
         html,
         width: 302,
         height: 800,
+        base64: false,
       });
 
       console.log('PDF created at:', uri);
       
       await shareAsync(uri, { 
         UTI: '.pdf', 
-        mimeType: 'application/pdf' 
+        mimeType: 'application/pdf',
+        dialogTitle: 'Chia sẻ phiếu giặt ủi'
       });
     } catch (error) {
       console.error('PDF creation error:', error);

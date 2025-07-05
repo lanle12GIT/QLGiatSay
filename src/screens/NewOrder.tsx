@@ -1,68 +1,60 @@
 // src/screens/NewOrder.tsx
 import React, { useEffect, useState } from 'react';
-import { FlatList } from 'react-native';
 import {
-  Box, Input, Button, Text, VStack, Pressable, HStack,
-  Select, CheckIcon, Divider, ScrollView,
+  Box, Button, Text, VStack, HStack, ScrollView,
   View
 } from 'native-base';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { RootTabParamList } from '../../App';
 import ServiceDropdown from '../components/ServiceDropdown';
 import { TextInput } from 'react-native-paper';
-import { CATEGORIES, Category } from '../models/Category';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { NewOrderStackParamList } from '../../App';
+import { Category } from '../models/Category';
+import { CATEGORIES } from '../db/Category';
+import { MOCK_CUSTOMERS } from '../db/Customer';
+import { ReceivedOrder } from '../models/ReceivedOrder';
+import { addNewReceivedOrder } from '../db/ReceivedOrder';
 
 type Props = NativeStackScreenProps<NewOrderStackParamList, 'NewOrder'>
-
-interface Customer { id: string; name: string; phone: string; }
-
-const MOCK_CUSTOMERS: Customer[] = [
-  { id: '1', name: 'Nguyễn Văn A', phone: '0912345678' },
-  { id: '2', name: 'Trần Thị B', phone: '0987654321' },
-];
 
 interface CategoryWeight {
   category: Category;
   weight: string;
 }
 
-export default function NewOrder({ navigation, route}: Props) {
+export default function NewOrder({ navigation, route }: Props) {
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [note, setNote] = useState('');
   const [categoryWeights, setCategoryWeights] = useState<CategoryWeight[]>(
-    CATEGORIES.map(cat => (
-      {
-        category: cat,
-        weight: '0'
-      }
-    )
-    )
+    CATEGORIES.map(cat => ({
+      category: cat,
+      weight: '0'
+    }))
   );
-console.log('navigation', navigation);
-    console.log('route', route);
- // Nhận dữ liệu từ CustomerInput
+
+  // Nhận dữ liệu từ CustomerInput
   useEffect(() => {
-    console.log('navigation', navigation);
-    console.log('route', route);
-  }, [navigation, route]);
+    if (route.params?.customerData) {
+      const { phone, name } = route.params.customerData;
+      setPhone(phone);
+      setName(name);
+    }
+  }, [route.params]);
 
   const handleCustomerInputPress = () => {
-    navigation.navigate('CustomerInput');
-  };
-  
-  const handleSelectCustomer = (item: Customer) => {
-    setPhone(item.phone);
-    setName(item.name);
+    navigation.navigate('CustomerInput', {
+      initialPhone: phone,
+      initialName: name
+    });
   };
 
   const suggestions = MOCK_CUSTOMERS.filter(c =>
     c.phone.includes(phone) || c.name.toLowerCase().includes(name.toLowerCase())
   );
- 
+
 
   const calculateTotal = (categoryWeight: CategoryWeight) => {
     const weight = parseFloat(categoryWeight.weight) || 0;
@@ -72,6 +64,29 @@ console.log('navigation', navigation);
       (parseFloat(categoryWeight.category.price) * parseFloat(categoryWeight.weight) / 1000).toFixed(1)
     )
   };
+
+  var totalPrice: number = 0;
+
+  const onPressSaveAndPrint = () => {
+    const orderData: ReceivedOrder = {
+      name,
+      phone,
+      note,
+      categoryWeights: categoryWeights.map(cat => ({
+        categoryName: cat.category.name,
+        weight: cat.weight,
+        price: cat.category.price,
+        categoryId: cat.category.id
+      })),
+      totalPrice: totalPrice.toFixed(1)
+    };
+    console.log('Order Data:', orderData);
+    addNewReceivedOrder(orderData);
+    navigation.navigate('OrderTem', {
+      orderData: orderData
+    });
+  }
+
   return (
     <View bg="white" flex={1} flexDirection="column" px={4} py={3}>
 
@@ -83,33 +98,19 @@ console.log('navigation', navigation);
             placeholder="Tên khách hàng"
             value={name}
             onPress={handleCustomerInputPress}
+            
           />
         </Box>
 
         <Box>
           <TextInput
             placeholder="SĐT khách hàng"
-            keyboardType="phone-pad"
             value={phone}
-            onChangeText={setPhone}
+            onPress={handleCustomerInputPress}
           />
         </Box>
-        {(phone || name) && suggestions.length > 0 && (
-          <Box borderWidth={1} borderColor="gray.300" rounded="md" bg="gray.50" >
-            <FlatList
-              data={suggestions}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <Pressable onPress={() => handleSelectCustomer(item)}>
-                  <Box py={2}>
-                    <Text>{item.name} - {item.phone}</Text>
-                  </Box>
-                </Pressable>
-              )}
-            />
-          </Box>
-        )}
-        <Box mt={-3} mb={4}>
+
+        <Box mb={4}>
           <TextInput
             placeholder="Ghi chú"
             value={note}
@@ -117,6 +118,9 @@ console.log('navigation', navigation);
           />
         </Box>
       </VStack>
+      <Box>
+        <ServiceDropdown></ServiceDropdown>
+      </Box>
 
       <HStack mb={1} alignItems="center" space={2}>
         <Text flex={2} bold>Loại đồ</Text>
@@ -163,16 +167,17 @@ console.log('navigation', navigation);
         </Box>
       </ScrollView>
 
-      <Box>
-        <ServiceDropdown></ServiceDropdown>
-      </Box>
+
 
       <HStack alignItems="center" justifyContent="flex-end">
         <Text bold fontSize="md">Tổng tiền:&nbsp;</Text>
-        <Text bold fontSize="lg" color="primary.600">{'0'} đ</Text>
+        {categoryWeights.forEach((categoryWeight: CategoryWeight) => {
+          totalPrice += parseFloat(calculateTotal(categoryWeight));
+        })}
+        <Text bold fontSize="md" color="primary.600">{totalPrice} K</Text>
       </HStack>
       <Button
-        onPress={() => navigation.navigate('Received')}
+        onPress={onPressSaveAndPrint}
       >
         Lưu & In Tem
       </Button>

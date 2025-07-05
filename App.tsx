@@ -1,7 +1,7 @@
 // App.tsx
 import React from "react";
 // import { NativeBaseProvider, extendTheme } from "native-base";
-import { NativeBaseProvider, extendTheme } from "native-base";
+import { NativeBaseProvider, Text, extendTheme } from "native-base";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +15,8 @@ import { PaperProvider } from "react-native-paper";
 import Revenue from "./src/screens/Revenue";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import CustomerInput from "./src/screens/CustomerInput";
+import { ReceivedOrder } from "./src/models/ReceivedOrder";
+import OrderTem from "./src/screens/OrderTem";
 
 // Tuỳ biến theme nếu cần
 const theme = extendTheme({
@@ -39,7 +41,7 @@ export type RootTabParamList = {
 export type NewOrderStackParamList = {
   NewOrder?: any;
   CustomerInput?: any;
-  Received?: undefined;
+  OrderTem: { orderData: ReceivedOrder };
 }
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -59,9 +61,9 @@ function NewOrderStackNavigator() {
 
       />
       <NewOrderStack.Screen 
-        name="Received" 
-        component={Received}
-        options={{ headerShown: false }} 
+        name="OrderTem" 
+        component={OrderTem}
+        options={{ title: "In đơn hàng mới" }} 
       />
 
     </NewOrderStack.Navigator>
@@ -128,16 +130,17 @@ export default function App() {
               options={{ title: "Đơn đã sẵn sàng" }}
             />
             <Tab.Screen
+              name="Revenue"
+              component={Revenue}
+              options={{ title: "Doanh thu" }}
+            />
+            <Tab.Screen
               name="Settings"
               component={Settings}
               options={{ title: "Cài đặt" }}
             />
 
-            <Tab.Screen
-              name="Revenue"
-              component={Revenue}
-              options={{ title: "Doanh thu" }}
-            />
+            
           </Tab.Navigator>
         </NavigationContainer>
       </NativeBaseProvider>

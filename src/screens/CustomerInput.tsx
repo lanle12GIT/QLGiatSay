@@ -23,8 +23,9 @@ const MOCK_CUSTOMERS: Customer[] = [
 ];
 
 export default function CustomerInput({ navigation, route }: Props) {
-  const [phone, setPhone] = useState(route.params?.CustomerInput?.initialPhone || '');
-  const [name, setName] = useState(route.params?.CustomerInput?.initialName || '');
+  // Nhận dữ liệu từ params - có thể là initialPhone/initialName hoặc dữ liệu hiện tại
+  const [phone, setPhone] = useState(route.params?.initialPhone || '');
+  const [name, setName] = useState(route.params?.initialName || '');
   const [searchTerm, setSearchTerm] = useState('');
 
   const suggestions = MOCK_CUSTOMERS.filter(c =>
@@ -35,6 +36,7 @@ export default function CustomerInput({ navigation, route }: Props) {
   const handleSelectCustomer = (item: Customer) => {
     setPhone(item.phone);
     setName(item.name);
+    setSearchTerm(''); // Xóa ô tìm kiếm sau khi chọn
   };
 
   const handleSave = () => {
@@ -45,10 +47,10 @@ export default function CustomerInput({ navigation, route }: Props) {
   };
 
   return (
-    <View bg="white" flex={1} px={4} py={3}>
-      <VStack space={4}>
+    <View bg="white" flex={1} px={2} py={1}>
+      <VStack space={2}>
         <Box>
-          <Text mb={2} fontSize="md">Tìm kiếm khách hàng</Text>
+          <Text mb={1} fontSize="md">Tìm kiếm khách hàng</Text>
           <TextInput
             placeholder="Nhập tên hoặc SĐT để tìm kiếm"
             value={searchTerm}
@@ -63,7 +65,7 @@ export default function CustomerInput({ navigation, route }: Props) {
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
                 <Pressable onPress={() => handleSelectCustomer(item)}>
-                  <Box p={3} borderBottomWidth={1} borderBottomColor="gray.200">
+                  <Box p={2} borderBottomWidth={1} borderBottomColor="gray.200">
                     <Text fontSize="md" bold>{item.name}</Text>
                     <Text fontSize="sm" color="gray.600">{item.phone}</Text>
                   </Box>
@@ -74,7 +76,7 @@ export default function CustomerInput({ navigation, route }: Props) {
         )}
 
         <Box>
-          <Text mb={2} fontSize="md">Tên khách hàng</Text>
+          <Text mb={1} fontSize="md">Tên khách hàng</Text>
           <TextInput
             placeholder="Nhập tên khách hàng"
             value={name}
@@ -83,7 +85,7 @@ export default function CustomerInput({ navigation, route }: Props) {
         </Box>
 
         <Box>
-          <Text mb={2} fontSize="md">Số điện thoại</Text>
+          <Text mb={1} fontSize="md">Số điện thoại</Text>
           <TextInput
             placeholder="Nhập số điện thoại"
             keyboardType="phone-pad"
@@ -92,7 +94,7 @@ export default function CustomerInput({ navigation, route }: Props) {
           />
         </Box>
 
-        <HStack space={3} mt={6}>
+        <HStack space={3} mt={4}>
           <Button 
             flex={1} 
             variant="outline"
